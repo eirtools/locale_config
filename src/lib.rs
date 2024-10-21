@@ -190,14 +190,14 @@ lazy_static! {
     .unwrap();
 }
 
-fn is_owned<'a, T: ToOwned + ?Sized>(c: &Cow<'a, T>) -> bool {
+fn is_owned<T: ToOwned + ?Sized>(c: &Cow<'_, T>) -> bool {
     match *c {
         Cow::Owned(_) => true,
         Cow::Borrowed(_) => false,
     }
 }
 
-fn canon_lower<'a>(o: Option<&'a str>) -> Cow<'a, str> {
+fn canon_lower(o: Option<&str>) -> Cow<'_, str> {
     match o {
         None => Cow::Borrowed(""),
         Some(s) => {
@@ -210,7 +210,7 @@ fn canon_lower<'a>(o: Option<&'a str>) -> Cow<'a, str> {
     }
 }
 
-fn canon_script<'a>(o: Option<&'a str>) -> Cow<'a, str> {
+fn canon_script(o: Option<&str>) -> Cow<'_, str> {
     assert!(o.map_or(true, |s| s.len() >= 2 && &s[0..1] == "-"));
     match o {
         None => Cow::Borrowed(""),
@@ -230,7 +230,7 @@ fn canon_script<'a>(o: Option<&'a str>) -> Cow<'a, str> {
     }
 }
 
-fn canon_upper<'a>(o: Option<&'a str>) -> Cow<'a, str> {
+fn canon_upper(o: Option<&str>) -> Cow<'_, str> {
     assert!(o.map_or(true, |s| s.len() > 1 && &s[0..1] == "-"));
     match o {
         None => Cow::Borrowed(""),
@@ -258,7 +258,7 @@ impl<'a> LanguageRange<'a> {
     /// [RFC5646]: https://www.rfc-editor.org/rfc/rfc5646.txt
     /// [RFC4647]: https://www.rfc-editor.org/rfc/rfc4647.txt
     pub fn new(lt: &'a str) -> Result<LanguageRange> {
-        if lt == "" {
+        if lt.is_empty() {
             return Ok(LanguageRange {
                 language: Cow::Borrowed(lt),
             });
@@ -391,22 +391,22 @@ impl<'a> LanguageRange<'a> {
                 // Anything else:
                 // en@boldquot, en@quot, en@piglatin - just randomish stuff
                 // @cjknarrow - beware, it's gonna end up as -u-va-cjknarro due to lenght limit
-                s if s.len() <= 8 => uvariant = &*s,
+                s if s.len() <= 8 => uvariant = s,
                 s => uvariant = &s[0..8], // the subtags are limited to 8 chars, but some are longer
             };
-            if script != "" {
+            if !script.is_empty() {
                 res.push('-');
                 res.push_str(script);
             }
-            if region != "" {
+            if !region.is_empty() {
                 res.push('-');
-                res.push_str(&*region.to_ascii_uppercase());
+                res.push_str(&region.to_ascii_uppercase());
             }
-            if variant != "" {
+            if !variant.is_empty() {
                 res.push('-');
                 res.push_str(variant);
             }
-            if uvariant != "" {
+            if !uvariant.is_empty() {
                 res.push_str("-u-va-");
                 res.push_str(uvariant);
             }
@@ -539,7 +539,7 @@ impl Locale {
                 return Err(Error::NotWellFormed);
             }
         }
-        return Ok(res);
+        Ok(res)
     }
 
     /// Construct invariant locale.
@@ -558,7 +558,7 @@ impl Locale {
                 return; // don't add duplicates
             }
         }
-        self.inner.push_str(",");
+        self.inner.push(',');
         self.inner.push_str(tag.as_ref());
     }
 
@@ -578,9 +578,9 @@ impl Locale {
                 return; // don't add duplicates
             }
         }
-        self.inner.push_str(",");
+        self.inner.push(',');
         self.inner.push_str(category);
-        self.inner.push_str("=");
+        self.inner.push('=');
         self.inner.push_str(tag.as_ref());
     }
 
@@ -590,7 +590,7 @@ impl Locale {
     /// in the list are returned, in order of preference.
     ///
     /// The iterator is guaranteed to return at least one value.
-    pub fn tags<'a>(&'a self) -> Tags<'a> {
+    pub fn tags(&self) -> Tags<'_> {
         Tags {
             tags: self.inner.split(","),
         }
@@ -609,7 +609,7 @@ impl Locale {
             if s.starts_with(category) && s[category.len()..].starts_with("=") {
                 return TagsFor {
                     src: self.inner.as_ref(),
-                    tags: tags,
+                    tags,
                     category: Some(category),
                 };
             }
@@ -676,7 +676,7 @@ impl<'a> Iterator for Tags<'a> {
                 ));
             }
         } else {
-            return None;
+            None
         }
     }
 }
@@ -698,7 +698,7 @@ impl<'a, 'c> Iterator for TagsFor<'a, 'c> {
     type Item = LanguageRange<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         if let Some(cat) = self.category {
-            while let Some(s) = self.tags.next() {
+            for s in self.tags.by_ref() {
                 if s.starts_with(cat) && s[cat.len()..].starts_with("=") {
                     return Some(LanguageRange {
                         language: Cow::Borrowed(&s[cat.len() + 1..]),
@@ -708,14 +708,14 @@ impl<'a, 'c> Iterator for TagsFor<'a, 'c> {
             self.category = None;
             self.tags = self.src.split(",");
         }
-        while let Some(s) = self.tags.next() {
+        for s in self.tags.by_ref() {
             if s.find('=').is_none() {
                 return Some(LanguageRange {
                     language: Cow::Borrowed(s),
                 });
             }
         }
-        return None;
+        None
     }
 }
 
@@ -755,7 +755,7 @@ mod emscripten;
 #[cfg(target_os = "macos")]
 mod macos;
 
-static INITIALISERS: &'static [fn() -> Option<Locale>] = &[
+static INITIALISERS: &[fn() -> Option<Locale>] = &[
     cgi::system_locale,
     unix::system_locale,
     #[cfg(target_family = "windows")]
@@ -772,7 +772,7 @@ fn system_locale() -> Locale {
             return l;
         }
     }
-    return Locale::invariant();
+    Locale::invariant()
 }
 
 // --------------------------------- ERRORS ------------------------------------

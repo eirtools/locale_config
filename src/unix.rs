@@ -50,7 +50,7 @@ pub fn system_locale() -> Option<Locale> {
     // LANGUAGE defines fallbacks
     if let Ok(langs) = env::var("LANGUAGE") {
         for i in langs.split(':') {
-            if i != "" {
+            if !i.is_empty() {
                 if let Ok(tag) = tag(i) {
                     loc.add(&tag);
                 }
@@ -58,8 +58,8 @@ pub fn system_locale() -> Option<Locale> {
         }
     }
     if loc.as_ref() != "" {
-        return Some(loc);
+        Some(loc)
     } else {
-        return None;
+        None
     }
 }
