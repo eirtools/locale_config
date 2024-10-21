@@ -1,12 +1,9 @@
-[![TravisCI Build Status](https://travis-ci.org/rust-locale/locale_config.svg?branch=master)](https://travis-ci.org/rust-locale/locale_config)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/13100wtqs80tyink/branch/master?svg=true)](https://ci.appveyor.com/project/jan-hudec/locale-config/branch/master)
-[![Crates.io Version](https://img.shields.io/crates/v/locale_config.svg)](https://crates.io/crates/locale_config)
-[![Docs.rs](https://docs.rs/locale_config/badge.svg)](https://docs.rs/locale_config/)
-
 # `locale_config`
 
 Remembers locale configuration per-thread and per-process and initializes the
 values by inspecting the system for user preferences.
+
+FYI: it's a hard fork of https://github.com/rust-locale/locale_config which hasn't been maintained for a while
 
 ## Installation
 
@@ -14,7 +11,7 @@ You can depend on this library by adding `locale_config` to your Cargo dependenc
 
 ```toml
 [dependencies]
-locale_config = "*"
+locale_config = { git="https://github.com/eirtools/locale_config" }
 ```
 
 Usually it is not recommended to depend on `*`, but in this case it is
@@ -69,8 +66,6 @@ Note that this crate does not itself provide any translation, formatting nor
 collation functionality. Formatting and collation will be provided by
 `locale` crate, translation has multiple available implementations.
 
-See full documentation on [![Docs.rs](https://docs.rs/locale_config/badge.svg)](https://docs.rs/locale_config/) or [github](https://rust-locale.github.io/locale_config/locale_config/).
-
 ## Supported systems
 
 * **Unix:** Using the POSIX standard environment variables `LANG`, `LC_*` and
@@ -96,6 +91,10 @@ See full documentation on [![Docs.rs](https://docs.rs/locale_config/badge.svg)](
   can be used whenever detected.
 
 ## Changelog
+
+### Unreleased
+
+ * Rebrand
 
 ### 0.3.0
 
