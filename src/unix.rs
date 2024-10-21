@@ -1,7 +1,7 @@
 //! Inspect Unix system for locale configuration
 
+use super::{LanguageRange, Locale};
 use std::env;
-use super::{LanguageRange,Locale};
 
 fn tag(s: &str) -> super::Result<LanguageRange> {
     LanguageRange::from_unix(s).or_else(|_| LanguageRange::new(s))
@@ -20,29 +20,29 @@ pub fn system_locale() -> Option<Locale> {
         }
     }
     // LANG is default
-    let mut loc =
-        if let Ok(lang) = env::var("LANG") {
-            Locale::from(tag_inv(lang.as_ref()))
-        } else {
-            Locale::invariant()
-        };
+    let mut loc = if let Ok(lang) = env::var("LANG") {
+        Locale::from(tag_inv(lang.as_ref()))
+    } else {
+        Locale::invariant()
+    };
     // category overrides
     for &(cat, var) in [
-        ("ctype",       "LC_CTYPE"),
-        ("numeric",     "LC_NUMERIC"),
-        ("time",        "LC_TIME"),
-        ("collate",     "LC_COLLATE"),
-        ("monetary",    "LC_MONETARY"),
-        ("messages",    "LC_MESSAGES"),
-        ("paper",       "LC_PAPER"),
-        ("name",        "LC_NAME"),
-        ("address",     "LC_ADDRESS"),
-        ("telephone",   "LC_TELEPHONE"),
+        ("ctype", "LC_CTYPE"),
+        ("numeric", "LC_NUMERIC"),
+        ("time", "LC_TIME"),
+        ("collate", "LC_COLLATE"),
+        ("monetary", "LC_MONETARY"),
+        ("messages", "LC_MESSAGES"),
+        ("paper", "LC_PAPER"),
+        ("name", "LC_NAME"),
+        ("address", "LC_ADDRESS"),
+        ("telephone", "LC_TELEPHONE"),
         ("measurement", "LC_MEASUREMENT"),
-    ].iter() {
+    ]
+    .iter()
+    {
         if let Ok(val) = env::var(var) {
-            if let Ok(tag) = tag(val.as_ref())
-            {
+            if let Ok(tag) = tag(val.as_ref()) {
                 loc.add_category(cat, &tag);
             }
         }
