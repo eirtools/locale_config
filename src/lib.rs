@@ -15,11 +15,17 @@
 #[macro_use]
 extern crate lazy_static;
 
+<<<<<<< HEAD
 extern crate regex_lite as regex;
+=======
+#[cfg(target_os = "macos")]
+extern crate objc2;
+>>>>>>> main
 
 #[cfg(target_os = "macos")]
-#[macro_use]
-extern crate objc;
+extern crate objc2_foundation;
+
+extern crate regex;
 
 use regex::Regex;
 use std::borrow::{Borrow, Cow};
@@ -529,6 +535,7 @@ impl Locale {
                     .name("tag")
                     .map(|m| m.as_str())
                     .ok_or(Error::NotWellFormed))));
+
                 match caps.name("category").map(|m| m.as_str()) {
                     Some(cat) => res.add_category(cat.to_ascii_lowercase().as_ref(), &tag),
                     None => res.add(&tag),
