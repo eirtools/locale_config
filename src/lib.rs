@@ -15,17 +15,12 @@
 #[macro_use]
 extern crate lazy_static;
 
-<<<<<<< HEAD
 extern crate regex_lite as regex;
-=======
 #[cfg(target_os = "macos")]
 extern crate objc2;
->>>>>>> main
 
 #[cfg(target_os = "macos")]
 extern crate objc2_foundation;
-
-extern crate regex;
 
 use regex::Regex;
 use std::borrow::{Borrow, Cow};
