@@ -1,3 +1,5 @@
+**DEPRECATED**: This lib is deprecated as I found more suitable `sys-locale` crate to use. I don't exclude that I'll return to this library, but currently it's deprecated for time being
+
 # `locale_config`
 
 Remembers locale configuration per-thread and per-process and initializes the
